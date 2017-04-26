@@ -1,0 +1,1079 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+\usepackage{listings} 
+
+\usepackage[dvipsnames]{xcolor}
+
+
+\lstset{language=C++,
+  basicstyle=\small\ttfamily,
+  commentstyle=\color{gray}\ttfamily, 
+  keywordstyle=\color{blue}\ttfamily,
+  numberstyle=\tiny\color{green},
+  stringstyle=\color{purple},
+  tabsize=2, 
+  frame=l, 
+  %morekeywords={*,...},
+  keepspaces=true,      
+  showstringspaces=true
+}
+
+\setcounter{tocdepth}{4}
+
+\newcommand{\code}[1]{\texttt {#1}}
+\newcommand{\cxi}{\textcolor{red}{C++11}}
+\newcommand{\caut}{\textbf{!!}}
+
+
+\begin{document}
+
+
+
+
+
+
+\title{C++: notes}
+
+\maketitle
+
+\tableofcontents
+
+
+\part{Language}
+
+
+%%%%%
+\section{Basics}
+
+%%%%
+\subsection{Compilation}
+\code{c++ -Wall -o exec\_name file\_list} \\
+
+\code{-Wl,--no-as-needed} loads everything even if doesn't needed. For example, useful when the  dependence is not explicit. \\
+
+With \textsf{Valgrind}
+\code{c++ -Wall -g3 -ggdb -gdwarf-3 -fsanitize=address -o exec\_name file\_list} \\
+
+
+
+%%%%
+\subsection{Types}
+\begin{itemize}
+ \item signed integers: \texttt{int, short, long, long long}
+ \item unsigned integers
+ \item enumerators \texttt{enumerators} 
+ \item floating point
+ \item characters
+ \item C-strings
+ \item logicals
+ \item \code{enum, \cxi enum class}
+\end{itemize}
+%%%
+\subsubsection{Declaration}
+\begin{itemize}
+ \item Unmodifiable: \texttt{const} 
+ \item \cxi \texttt{constexpr} known at compile time
+ \item \cxi \texttt{auto, decltype}
+ \item \texttt{typedef /type/ /name/} (useful to modify by changing just one line)
+\end{itemize}
+
+%%%
+\subsubsection{Type cast}
+\begin{itemize}
+ \item C-style cast: \texttt{i=(int)x; j=int(y)}
+ \item \texttt{i=static\_cast<int>(x)}
+ \item \code{*const\_cast<int*>(p)=2;} force the modification of a non-\texttt{const} variable through a pointer to \texttt{const}.
+ \item \code{int* pi = reinterpret\_cast<int*>(pf);} no checks.
+\end{itemize}
+
+
+
+\subsection{Operators}
+\begin{itemize}
+ \item unary
+ \item binary
+ \item ternary
+ \item others: \texttt{(), new, delete, sizeof(), ...}
+\end{itemize}
+Precedence and associativity table.
+Priority: \\ 
+\texttt{
+++ --; \\
+* / \%; \\
++ -; \\
+< > <= >= == !=; \\
+= *= /= \%= += -=
+}
+
+Division between integers is an \texttt{int} \caut
+
+\texttt{k=(i+3)*(++i);} is undefined
+\texttt{float x=5.7/(j=i);} is defined: \textbf{assignment operators are expressions} \caut
+
+\subsubsection{Logical and bitwise operators}
+\begin{itemize}
+ \item logical (decreasing priority): \texttt{\& \^ | \&\& || \&= \^= |=}
+ \item bitwise (decreasing priority): \texttt{<< >> <<= >>=}
+\begin{quotation}
+ \texttt{if(((i*i)<0)\&\&((j+=2)>10))} 
+ j not incremented
+\end{quotation}
+\end{itemize}
+
+
+
+\subsection{Flux control}
+Conditional statements: \code{if}
+Loop statements: \code{for, while, do while}; instructions: \code{continue, break}.
+Choice statements: \code{ switch (int-expr) { list-of-cases } }.
+
+
+
+
+
+\section{Functions}
+
+\subsection{\code{main} function}
+Returns an integer: 0 for no errors
+\texttt{main(int argc,char* argv[])} “words” in
+the command line.
+
+\subsection{Recursive functions}
+\begin{lstlisting}
+  unsigned int fact(unsigned int n) \{
+   if(n)return n*fact(n-1);
+   return 1;
+  \}
+\end{lstlisting}
+
+\subsection{\code{inline} functions}
+Not possible for recursive functions.
+
+\subsection{Arguments}
+Pass by value, reference, pointer.
+Overloading possible.
+
+
+
+\subsubsection{Default}
+\texttt{int f(int i,int j=1,int k=2);}
+If an argument has a default value, all the following ones
+must have one.
+
+\subsection{Predefined functions}
+Mathematical functions (in math.h):
+sqrt(double) , pow(double,double)
+sin(double) , acos(double) , ...
+atan2(double,double)
+exp(double) , log(double)
+fabs(double) : abs. value
+lround(double) , llround(double) : rounding
+Add a trailing “l” to use with long doubles
+Utility functions (in stdlib.h):
+random() : random int
+between 0 and 2 31 − 1 (RAND\_MAX≡0x7fffffff)
+srandom(unsigned int) : set the seed for the random
+generation
+exit(int) : stop the execution immedately
+
+
+
+
+
+\section{Pointers, arrays, references}
+
+\subsection{Pointers}
+\textit{A pointer is the memory address of the object it points to}.
+\begin{lstlisting}
+  int* p=\&i; // "p" is the address of "i"
+
+  *p=24; // "i" is now 24
+
+  p=&j; // "p" is now the address of "j"
+
+  const int* p=&i;
+
+  void* p=&i // Requires reinterpret_cast
+\end{lstlisting}
+A null pointer (\code{=0}) is always invalid (\cxi \code{nullptr})\caut
+
+In declaration \code{int* p, q} just p is pointer.
+
+\subsubsection{Arrays}
+\begin{lstlisting}
+ *p ≡ i[0] , *(p + n) ≡ i[n] , p + n ≡ \&i[n]
+\end{lstlisting}
+\cxi \textbf{array loop} \code{for (int\& j: i) j=2*k++;}
+
+Prevention of "\textit{narrowing}": \code{int j={43.1};} gives an error.
+
+\cxi initialization: \code{ int j[3]\{14,25,37\}; }.
+
+\textbf{Examples}
+\begin{lstlisting}
+ Particle**
+ const Particle* const * partList 
+\end{lstlisting}
+C-strings are arrays of \code{char}s, with a \code{\textbackslash0} as last element. 
+
+
+
+\subsection{References}
+Can be seen as a new name for an existing variable or object.
+Actually they’re pointers, with the “ * ” embedded.
+%%
+\paragraph{Dynamic memory}
+\begin{lstlisting}
+ int* i = new int(3);      //"i" is a pointer to an int whose value is "3"
+ float* f = new float[12]; // "f" is an array of 12 float
+ delete, delete[]
+\end{lstlisting}
+
+
+\paragraph{Caution}
+Only pointer or reference to persistent objects can be returned\caut
+\begin{lstlisting}
+int* f(int i) {
+  int j=i*2; // local variable, destroyed
+              // when "f" returns
+  return &j; // unvalid pointer returned
+}
+\end{lstlisting}
+
+\paragraph{}
+“pointer/reference to const” declared as \code{const int* p=\&i;}: variable not modifiable through it.
+
+\paragraph{pointer to void}
+Can contain address of any variable or object. Cannot be dereferenced, deleted. Has to be used with a \code{reinterpret\_cast}.
+
+\paragraph{Dynamic memory handling}
+\code{new, delete} operators; dynamic variables are not bound to a scope.
+\code{float* f = new float[12];}
+When pointers go out of scope: \textbf{memory leak}.
+When pointers are empty, but still existing: \textbf{dangling references} and a second \code{delete} operation cannot be performed. 
+Deleting a null pointer has no effect. 
+
+%%%%%
+\section{Input-output}
+\subsection{To/from file}
+\begin{lstlisting}
+ #include <fstream>
+ std::ifstream file("inputfile");
+\end{lstlisting}
+\paragraph{Binary I/O}
+\begin{lstlisting}
+ std::ifstream file( "inputfile", std::ios::binary );
+ file.read( reinterpret_cast<char*>(&i), sizeof(i) );
+\end{lstlisting}
+
+%%%%%
+\section{Linkage and storage}
+%%%%
+\subsection{Extern linkage}
+Variable declared outside all functions has external linkage.
+To use it: \texttt{extern int i;}
+%%%%
+\subsection{Libraries}
+%%%
+\subsubsection{Static libraries}
+\begin{lstlisting}
+  c++ -c file2.cc
+  ar -r libTestS.a file2.o
+  c++ -o exec file1.cc -L. -lTestS
+\end{lstlisting}
+And include definitions everywhere %(\begin{lstlisting}#include"lib.h"\end{lstlisting})!
+And include guards:
+\begin{lstlisting}
+  #ifndef Lib.h
+  #define Lib.h
+  #endif
+\end{lstlisting}
+
+
+
+
+%%%%%
+\section{Composite types}
+%%%%
+\subsection{Classes}
+%%
+\subsubsection{Interface}
+\paragraph{Permissions}
+\begin{lstlisting}
+public:    // can be accessed by anything
+protected: // can be accessed by the same class and the derived ones
+private:   // can be accessed only from the class
+
+friend classes
+\end{lstlisting}
+
+\paragraph{Constructors and destructors}
+\texttt{function(...) const;}
+%%
+\paragraph{Constructors and deconstructors}
+\begin{lstlisting}
+  Point::Point(float cxi, float yi):
+    xp(cxi),
+    yp(yi)\{
+  \}
+  Point::~Point()\{
+  \}
+\end{lstlisting}
+Arguments initialized in declaration order
+\textbf{Default constructor}: constructor for each member.
+\textbf{Default deconstructor}: deconstructor for each member.
+\textbf{Default copy and assignment}: simply copied.
+Default only if not otherwise defined.
+%%
+\paragraph{Methods}
+Function members: direct access to member data of the object.
+\begin{lstlisting}
+  float Point::dist() const\{
+    return sqrt(pow(xp-p.xp,2) + pow(yp-p.yp,2));
+  \}
+\end{lstlisting}
+If using another class, header is \texttt{class Name;}.
+%%
+\paragraph{Shared members}
+\texttt{static} (different meaning!)
+Initialization: \texttt{float Line::tolerance=1.0e-05;}
+
+Pointer \texttt{*this} to the class itself
+%%
+\paragraph{\texttt{mutable}}: modifiable by a \texttt{const} function calling a const function modifying the variable.
+
+%%
+\paragraph{Operators}
+\texttt{Vector2D operator+(const Vector2D\& v);} \\
+\textbf{With write/read objects:}
+\begin{lstlisting}
+ std::ostream\& operator<< (std::ostream\& os, 
+                            const Vector2D\& v) \{
+		os << v.getX() << " " << v.getY();
+    return os;
+ };
+\end{lstlisting}
+%%
+\paragraph{Type conversions}
+Implicit vs. \texttt{explicit}.
+With operators (C++ explicit cast).
+
+%%
+\paragraph{Deep/shallow copy}
+Default: shallow copy. Does not prevent "double free".
+Empiristic rule: deep copy necessary when destructor declaration is necessary.
+Lowest-level protection: prevent object copying putting under \texttt{private}
+\begin{lstlisting}
+  private:
+   FloatArray(const FloatArray& a);
+   FloatArray& operator=(const FloatArray& a);
+\end{lstlisting}
+or write \texttt{= delete} after declaration (\textbf{C++11, better}).
+\textbf{Deep copy}: declaring \texttt{public} when copies are necessary
+\begin{lstlisting}
+  FloatArray(const FloatArray& a);
+  FloatArray& operator=(const FloatArray& a);
+  private:
+  void copy(const FloatArray& a);
+  
+  void FloatArray::copy(const FloatArray& a) \{
+  if(cont==a.cont)return; // skip "a=a" cases
+  delete[] cont; // delete old content
+  cont=new float[eltn=a.eltn];
+  // copy size and allocate new memory
+  float* pr=a.cont+eltn; // copy elements
+  loat* pl= cont+eltn; // one by one
+  while(pl>cont)*--pl=*--pr;
+  return;
+  \}
+  FloatArray::FloatArray(const FloatArray& a):
+  cont(0) \{ // set "cont" at 0 so that a
+  copy(a); // "delete[]" has no effect
+  \}
+  const FloatArray& FloatArray::operator=(
+  const FloatArray& a) \{
+  copy(a);
+  return *this; // return the just-copied
+  \}
+  // object as value
+\end{lstlisting}
+
+%%%%
+\subsection{Namespaces}
+\begin{lstlisting}
+namespace Geom { 
+ class Line; 
+ class Point { 
+  ... 
+ };  
+}; 
+\end{lstlisting}
+\texttt{typedef Geom::Point point;} \\
+\texttt{using Geom::Point;} \\
+\texttt{using namespace Geom;} Do not use it in header files: it affects all the translation unit \\
+ 
+%%%%
+\subsection{Exceptions}
+\texttt{throw}
+\texttt{try}
+\texttt{catch}
+
+
+%%%%%
+\section{Templates}
+\begin{lstlisting}
+  template<class T>
+  void perm(T& x,T& y,T& z) \{
+   // make a cyclic permutation of x,y,z
+   T t = x;
+   x = y;
+   y = z;
+   z = t;
+   return;
+  \}
+\end{lstlisting}
+or \texttt{template<typename T>}.
+\textbf{Full definition} before usage!
+
+%%%%
+\subsection{Class templates}
+\begin{lstlisting}
+  template<class T> // T replaces "float"
+  class Array \{
+  // everywhere
+  public:
+  // in the class definition
+  Array(int n);
+  
+  ~Array();
+  ...
+  private:
+  int eltn;
+  T* cont;
+  void copy(const Array<T>& a);
+  \};
+\end{lstlisting}
+The implementation must come before the class is used:
+it’s usually coded in “implementation files” (.hpp)
+included at the end of the header.
+Construction: \texttt{Array<float>}
+%%
+\paragraph{Nested classes}
+When calling from outside, use \texttt{typename A<T>::C}
+%%
+\paragraph{Variable number of arguments}
+\begin{lstlisting}
+void print() {
+ return;
+}
+
+template<typename T>
+void print(T t) {
+     //prints t
+}
+
+template<typename T, typename... R>
+void print(T t, R... r) {
+ cout << t <<" ";
+ print(r...);
+ return;
+}
+\end{lstlisting}
+%%
+\paragraph{}
+\begin{lstlisting}
+template<class T, unsigned int N>
+FixedSizeArray<T,N>
+\end{lstlisting}
+%%
+\paragraph{Template specialization}
+In addition to the generic one
+\begin...
+template<>
+Array<int>::Array(int n):
+eltn(n),
+cont(new int[eltn]) {
+cout << "create an Array of int" << endl;
+}
+\end...
+
+
+
+%%%%%
+\section{Standard Template Library}
+%%%%
+\subsection{Strings}
+%\begin{lstlisting}#include <string>\end{lstlisting}
+Creation: 
+\begin{lstlisting}
+string s("...");
+\end{lstlisting}
+Initialization: \code{string s = charvect} makes a copy.
+Conversion in C-string: 
+\begin{lstlisting}
+const char* c = s.c_str();
+\end{lstlisting}
+Copy (\texttt{=}) and concatenation (\texttt{+}). Compare (\texttt{==}).
+\begin{lstlisting}
+s.insert(n, "...")
+\end{lstlisting}
+Get m characters from the nth \texttt{s.substr(n,m)}
+\texttt{s.length()}
+\texttt{s.find("...")} returns the number of characters before the substrings, or \texttt{string::npos} if not found.
+
+\paragraph{I/O with \code{strings}}
+\begin{lstlisting}
+std::stringstream s;
+s.clear();
+s.str("12");
+s >> i;
+\end{lstlisting}
+
+
+
+%%%%%
+\section{Containers}
+\begin{itemize}
+ \item Sequences: contents stored in sequential order.
+ \begin{itemize}
+  \item Queues: contiguous memory location, random access supported, linear time to access data.
+  \item Lists: data linked to the previous/next one, random access not supported, constant time to access data. 
+ \end{itemize}
+ \item Associations: contents stored with a key.
+ \begin{itemize}
+  \item Sets
+  \item Maps
+ \end{itemize}
+\end{itemize}
+
+%%%%
+\subsection{Vectors}
+\texttt{std:vector}
+Index \texttt{n} is an \texttt{unsigned int}!
+%%
+\paragraph{Methods}
+
+Constructors:
+\begin{lstlisting}
+vector<T> v // create an empty vector
+vector<T> v(n)// create a vector with n elements
+vector<T> v(n,t)//
+create a vector with n elements initialized at t
+vector<T> v(u)// create a vector by copying vector u
+v[i]// reference to element at position i (unchecked range)
+v.at(i)// reference to element at position i (checked range: if empty returns an exception \texttt{core dumped})
+v.reserve(n)// allocate memory for n elements
+v.push\_back(t)// add an element at the end. !!Every push back over the allocated memory doubles the allocated memory. Use reserve before!!
+v.pop\_back()}: remove an element at the end
+v.resize(n)} , \code{v.resize(n,t)// set the number of
+elements by adding or removing elements at the end and
+leaving unchanged the others
+v.clear()// remove all elements (memory remains allocated)
+v.size()// number of elements (returns just the non-empty allocated memory)
+v.capacity()// available memory
+v.empty()// true if the number of elements is 0
+v.front()// reference to the first element
+v.back()// reference to the last element
+v[i]// reference to element at position i
+(unchecked range)
+v.at(i)// reference to element at position i
+(checked range)
+\end{lstlisting}
+
+%%
+\paragraph{Iterators}
+\begin{lstlisting}
+vector<T>::iterator i=v.begin() // an iterator pointing to the first element
+vector<T>::iterator i=v.end() // an iterator pointing to the next-to-last element
+*i // reference to the pointed element
+++i  i++ // move the iterator to the next element
+--i  i-- // move the iterator to the previous element
+vector<...>::iterator ii=it+n //create an iterator ii pointing n positions after it
+vector<...>::iterator ii=it-n //create an iterator ii pointing n positions before it
+it+=n  it-=n //move forward or backward of n positions
+int d = distance(ip,in) //compute how much ip must be advanced to reach in
+advance(it,n) // move it forward of n positions
+v.insert(it,t) // insert the element t at the position it
+v.insert(it,ib,ie) // insert the elements pointed by [ib,ie) at the position it
+v.erase(it)  v.erase(ib,ie) // erase the element(s) pointed by it or [ib,ie) after an insertion or erase, iterators pointing to elements of
+the sequence are invalidated
+const vector<T> v // a vector whose size and elements cannot be modified
+vector<T>::const_iterator // analogous to “pointer to const”
+vector<T>::reverse_iterator // allow the scan in the backward direction
+v.rbegin() , v.rend() // begin and end of the reversed vector
+\end{lstlisting}
+
+%%%%
+\subsection{Lists}
+\code{\#include <list>}
+
+%%%%
+\subsection{\code{set}s}
+\code{\#include <set>}
+\begin{lstlisting} set<int> s;\end{lstlisting}
+Elements automatically ordered.
+
+%%%%
+\subsection{\code{map}s}
+\code{\#include <map>} 
+\begin{lstlisting}map<Key,T> m(comp)\end{lstlisting}
+Each element is a \begin{lstlisting} std::pair<Key,T> \end{lstlisting} having two members:
+\code{first} with type Key
+\code{second} with type T
+\begin{lstlisting}
+m.insert(make_pair(k,x)) //insert x with key k
+
+m[k]; //returns/create a reference to element whose key is k
+\end{lstlisting}
+
+%%%%
+\subsection{Smart pointers}
+\begin{lstlisting}
+#include <memory>
+auto_ptr<A> a(new A)
+\end{lstlisting}
+Each copy gets the possession of the object pointed. Deprecated in C++98, better variations in C++11: 
+\begin{lstlisting} 
+ unique_ptr shared_ptr 
+\end{lstlisting}.
+
+
+
+
+
+
+%%%%%
+\section{Algorithms}
+\begin{lstlisting}
+#include <algorithms>
+\end{lstlisting}
+
+\subsection{Sorting}
+\(\mathcal{O}(N\ln(N))\)
+\paragraph{Using '<'}
+\code{sort(v.begin(),v.end());}
+\paragraph{Using '()'} 
+(to be defined)
+\code{sort(first,last,comp);}
+\paragraph{Using \textbf{lambda function}}:
+\begin{lstlisting}
+sort(first,last,
+            [](Vector2D* vl,Vector2D* vr){
+               return (pow(vl->getX(),2)+
+               pow(vl->getY(),2))<
+               (pow(vr->getX(),2)+
+               pow(vr->getY(),2));
+             });
+\end{lstlisting}
+Variables in the environment can be “captured”:
+\code{[]} capture nothing
+\code{[\&]} capture all by reference
+\code{[=]} capture all by value
+\code{[=,\&i]} capture all by value, but i by reference
+
+%%%%
+\subsection{\code{sort}}
+\begin{lstlisting}
+sort(v.begin(), v.end()
+\end{lstlisting} (\code{last} is actually one after the last one).
+\textbf{Using function object}
+\begin{lstlisting}
+sort(first, last, comp)
+\end{lstlisting} (using the \code{comp::bool operator()} operator of the class).
+\textbf{Lambda functions} can also be used:
+\begin{lstlisting} 
+       sort(first,last
+                      [] (Vector2D* vl, Vector2D* vr){
+                                               ... });
+\end{lstlisting}
+                       
+
+
+%%%%
+\subsection{Binary search}
+\begin{lstlisting}
+iter=lower_bound(first,last,i)\end{lstlisting} : the first element
+such that it and the following ones are \textsf{not smaller} than i
+\begin{lstlisting}iter=upper_bound(first,last,i)\end{lstlisting} : the first element
+such that it and the following ones are bigger than i 
+\begin{lstlisting}
+iter=lower_bound(first,last,i,comp)
+iter=upper_bound(first,last,i,comp)
+\end{lstlisting}
+
+%%%%%
+\section{Inheritance and polymorphism}
+
+%%%%
+\subsection{Inheritance}
+\textbf{Public inheritance}: new class can be used anywhere in place of its base.
+\begin{lstlisting}
+class Vector3D: public Vector2D{ ... };
+
+Vector3D u(3.4,4.5,7.2);
+Vector2D v= u; //"slicing"
+
+\end{lstlisting}
+
+The declaration of a function in a derived \code{class}
+hides all the functions with the same name in the base \code{class} ,
+also the ones with different parameters. 
+\begin{lstlisting}
+using vector2D::transform(...) //C++11 only
+\end{lstlisting}
+
+
+%%%%
+\subsection{Polymorphism}Functions of a base class can be declared to be
+“automatically” replaced by functions of the derived class
+even when called through the base class interface
+Functions behaving in this way are called “\code{virtual}” functions. The "virtual table" used in the call of virtual functions
+inside the base class functions, too.
+\begin{lstlisting}
+class Shape {
+ public:
+ ... 
+ virtual float perimeter() const;
+ virtual float area() const;
+ ...
+};
+class Triangle: public Shape {
+ public:
+ ...
+ virtual float perimeter() const; //"virtual" is not mandatory
+ virtual float area() const;
+ ...
+};
+
+Shape* t = new Triangle(...);
+\end{lstlisting}
+
+Call by pointer: slicing
+\begin{lstlisting}
+const Shape s = *t; //doesn't keep Triangle structure
+\end{lstlisting}
+
+\paragraph{Pure \code{virtual} functions}
+Functions to be necessarily
+(re)implemented in derived classes.
+\begin{lstlisting}
+virtual float perimeter() const = 0;
+\end{lstlisting}
+
+\paragraph{Base to derived type cast}
+\begin{lstlisting}
+Shape* s;
+...
+Square* q = dynamic_cast<Square*>(s);
+if(q!=0)cout << q->side() << endl;
+\end{lstlisting}
+If failed, returned a null pointer.
+
+\paragraph{Construction and destruction sequence}
+The base class constructor is run
+before the derived class constructor.
+The base class destructor is run
+after the derived class destructor.
+\caut The base class constructor and destructor
+cannot call the derived class functions!
+
+\paragraph{Multiple inheritance}
+In case of ambiguity:
+\begin{lstlisting}
+Derived* d;
+...
+d->f(); // ambiguous
+d->BaseA::f();
+\end{lstlisting}
+
+A “common” base can be declared to be shared by all its 
+derived classes: "direct base" for all derived
+classes in the inheritance chain.
+\begin{lstlisting}
+class Base {
+...
+};
+class IntermediateA: public virtual Base {
+...
+};
+class IntermediateB: public virtual Base {
+...
+};
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\part{Design patterns}
+
+\section{Creational}
+
+
+
+\subsection{Singleton}
+\begin{itemize}
+ \item can be instantiated only once
+ \item instance globally accessible
+ \item usually created at its first use 
+\end{itemize}
+
+\paragraph{Implementation}
+\begin{lstlisting}
+class ObjS {
+ public:
+  static ObjS* instance();
+  ...
+ private:
+  ObjS();
+  ~ObjS();
+  ObjS(const ObjS& x);
+  ObjS& operator=(const ObjS& x);
+};
+\end{lstlisting}
+
+\paragraph{"Pointer saving" implementation}
+When an object, derived from \texttt{Base}, is created and \texttt{obj} is null, its pointer is stored in \texttt{obj}.
+\begin{lstlisting}
+Base::Base() {
+	Base*& i=instance();
+	if(i==0)i=this;
+}
+Base*& Base::instance() {
+	static Base* obj=0;
+	return obj;
+}
+\end{lstlisting}
+
+
+
+
+
+\subsection{Factory}
+A “Factory” is a class that creates an instance of another class from a family of derived classes.
+
+\begin{itemize}
+ \item a (usually static) function returning a pointer to a base class
+ \item The client does not depend on the derived classes.
+ \item The client needs not knowing all the informations needed to
+create the objects.
+\end{itemize} 
+
+\paragraph{Implementation}
+\begin{lstlisting}
+class ShapeFactory {
+ public:
+  static Shape* create(...);
+ ...
+};
+\end{lstlisting}
+
+\paragraph{Abstract factory}
+An “Abstract Factory” is an interface to a concrete Factory, so that the objects actually created depend on the actual factory object. \\
+The function to create objects is declared virtual: to be reimplemented in every factories.
+
+
+
+
+
+
+\subsection{Builder}
+A “Builder” is a class that creates complex objects
+step by step
+Used to encapsulate the operations needed to create a
+complex object.
+A Builder has functions to specify how the objects is to be
+built, and a function to actually create the result.
+A Builder usually specify only an interface, while a
+Concrete Builder actually performs the operations.
+The client can create different objects by using similar
+operations.
+
+
+
+
+\subsection{Prototype}
+A “Prototype” is a class that creates new objects
+by cloning an initial object \\
+The object to clone can be obtained from a manager.\\ 
+As with Factory, the client need not knowing all the 
+concrete object types. \\
+The Prototype manager can allow the registration of new
+objects at runtime.\\
+New objects can be registered by loading new dynamic
+libraries at runtime by using the dlopen function. \\
+\begin{lstlisting}
+#include <dlfcn.h>
+...
+ void* p=dlopen("libName.so",RTLD_LAZY);
+...
+\end{lstlisting}
+
+
+
+\section{Structural}
+
+\section{Behavioural}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\part{Root}
+%%%%%
+\section{Root language}
+\begin{lstlisting}
+~> c++ -Wall ‘root-config --cflags‘ \
+? -o prog prog.cc ‘root-config --libs‘
+~> setenv LD_LIBRARY_PATH \
+? ${LD_LIBRARY_PATH}":${ROOTSYS}/lib"
+\end{lstlisting}
+%%%%
+\subsection{Histograms}
+Histograms are object of type \code{TH1F}
+\begin{lstlisting}
+TH1F* h=new TH1F(name,title,
+nbin,xmin,xmax);
+\end{lstlisting}
+Use C-strings.
+\begin{lstlisting}
+h->Fill(x) //fills the histogram
+int n=h->GetNbinsX() //gives the number of bins.
+float c=h->GetBinContent(i); //gives the content of bin i :
+                     //i=0 gives the underflow content,
+                     //i=n+1 gives the overflow content.
+float e=h->GetBinError(i); //gives the error on content of bin i 
+h->SetBinContent(i,c); //set the content of bin i at c ;
+h->SetBinError(i,e);   //set the error on content of bin i at e ;
+int i=h->FindBin(x);   // gives the bin whose interval contains x .
+\end{lstlisting}
+To store histograms:
+\begin{lstlisting}
+TDirectory* currentDir=gDirectory;
+TFile* file=new TFile(name,mode); //C-string; 
+          /*mode="CREATE" or "NEW" : create a new file and open it for writing; if the file already ecxists it’s NOT opened;
+                 "RECREATE" :create a new file and open it for writing; if the file already ecxists it’s overwritten;
+                 "UPDATE" open an ecxisting file for writing; if the file does not ecxist it’s created;
+                 "READ" (default) open an ecxisting file for reading.*/
+h->Write();
+delete file;
+currentDir->cd();
+\end{lstlisting}
+To retrieve histograms:
+\begin{lstlisting}
+TDirectory* currentDir=gDirectory;
+TFile* file=new TFile(f_name,mode);
+currentDir->cd();
+TH1F* h = dynamic_cast<TH1F*>(
+file->Get(h_name)->Clone() );
+delete file;
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Sources}
+Profs. Garfagnini, Ronchese
+
+
+\end{document}

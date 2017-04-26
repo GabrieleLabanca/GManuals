@@ -1,0 +1,125 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+\usepackage{listings}
+\lstset{language=sh}
+
+\begin{document}
+
+\title{Ambiente Unix, Linux: appunti}
+
+\maketitle
+
+\section{Directories}
+\texttt{pwd} print working directory\newline
+\texttt{mkdir nomedir}\newline
+\texttt{rmdir nomedir}\newline
+\texttt{ls}
+\begin{description}
+ \item[\texttt{-l}] mostra i dettagli;
+ \item[\texttt{-a}] file nascosti;
+ \item[\texttt{-ls}] in ordine decrescente di dimensione;
+ \item[\texttt{-lt}] in ordine dal pi\`u recente al pi\`u vecchio;
+ \item[\texttt{-R}] mostra ricorsivamente il contenuto delle subdirectories;
+ \item[\texttt{*term}] mostra i files che terminano con term;
+ \item[\texttt{[abc]*, [a-c]*} mostra i files che iniziano con a, b o c.
+\end{description}
+\texttt{cp oldfile newfile} copia.\newline
+\texttt{mv oldname newname} sposta.\newline
+\texttt{file filename} mostra tipo del file.\newline
+\texttt{chmod [ugoa] +-= [rwx] filename} assegna/toglie all'utente/al gruppo/a utenti di gruppi diversi il permesso di leggere/scrivere/eseguire.\newline
+\texttt{n (-s) nomefile nomelink} crea una copia  di nomefile e inoltre ogni modifica su uno dei due files è immediatamente applicata anche all'altro; -s lo rende un puntatore.\newline
+
+\section{Input e output}
+\texttt{head -n}
+\code{cat xxx | more} displays the output in parts
+
+
+\section{Comandi}
+La struttura di un comando Unix è \texttt{nomecomando [-opz1 ... -opzn] [file1 ... filen | dir1 ... dirn]}.
+
+\section{Devices}
+L'implementazione dei file system rende trasparente la relazione tra i devices fisici (dischi, cdrom, etc.) e i files in essi contenuti.
+\texttt{df} mostra la struttura del file system e l'utilizzo di spazio. \newline
+\texttt{du} \newline
+
+
+\section{Installazione applicazioni}
+\subsection{.tar.gz}
+\begin{quotation}
+  The first thing you need to do is extracting it in a folder, let's make it your desktop. You can extract an archive right clicking on it and choosing the appropriate entry. It should create a new folder with a similar name, e.g. program-1.2.3. Now you need to open your terminal and then go to that directory:
+
+ \texttt{cd /home/yourusername/Desktop/program-1.2.3}
+ Make sure you first read a file called INSTALL or INSTALL.txt or README. Check if there is any of these files with the ls command, and then display the right one with:
+
+ \texttt{xdg-open INSTALL}
+ The file will contain the right indications to go on with the compiling process. Usually the three "classical" steps are:
+
+ \texttt{./configure \\ make \\ sudo make install}
+ (Il readme suggerisce \texttt{./configure && make && make install}
+ You may also need to install some dependencies, generally after some configure error which will tell you what you are missing. You can also use  checkinstall instead of make install. See here https://help.ubuntu.com/community/CheckInstall
+
+ Remember that your mileage may vary.
+ 
+\end{quotation}
+
+
+%%%%%
+\section{Script}
+%%
+\begin{lstlisting}
+if commands; then
+commands
+[elif commands; then
+commands...]
+[else
+commands]
+fi
+\end{lstlisting}
+\begin{lstlisting}
+if [ -f .bash_profile ]; then
+    echo "You have a .bash_profile. Things are fine."
+else
+    echo "Yikes! You have no .bash_profile!"
+fi
+\end{lstlisting}
+
+\begin{lstlisting}
+case $character in
+    1 ) echo "You entered one."
+        ;;
+    2 ) echo "You entered two."
+        ;;
+    3 ) echo "You entered three."
+        ;;
+    * ) echo "You did not enter a number between 1 and 3."
+esac
+\end{lstlisting}
+\texttt{chmod +x scriptname.sh}
+
+
+%%%%%
+\section{Varie}
+\texttt{whoami} mostra il nome utente. \newline
+
+
+
+
+
+\section{Stampanti}
+Per stampare un file si usa il comando lpr -Pnomestampante nomefile.
+è buona cosa verificare: la lunghezza del documento, l'effettiva possibilità di stampare un documento (p.es. stampare un file.ps su una stampante non PostScript produce disastri), la possibilità di stampare fronte/retro lpr -K2 -Pnomestampante nomefile,
+di stampare due pagine per facciata lpr -N2 -Pnomestampante nomefile.
+Lo stato di una coda di stampa si verifica con il comando lpq -PnomestampanteV
+
+
+
+
+
+
+
+\end{document}
+
+Fonti:
+http://wwwteor.mi.infn.it/~vicini/lezioni1112/lezione_1_linux.html
+http://wwwteor.mi.infn.it/~vicini/lezioni1112/lezione_2_linux.html
